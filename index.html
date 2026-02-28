@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMENA Teacher AI - Empowering Rwandan Education</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066cc;
+            --primary-dark: #0052a3;
+            --secondary: #00a86b;
+            --accent: #f4a261;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: rgba(148, 163, 184, 0.2);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 102, 204, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 168, 107, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(244, 162, 97, 0.1) 0%, transparent 40%);
+            animation: bgMove 20s ease-in-out infinite;
+        }
+
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes bgMove {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-50px, -50px) rotate(5deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Layout */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Auth Screens */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 30px rgba(0, 102, 204, 0.3);
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .auth-switch a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        /* Main App Layout */
+        .main-app {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+            height: calc(100vh - 40px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .user-info h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-info p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .nav-menu {
+            flex: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(0, 102, 204, 0.1);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(0, 102, 204, 0.2), rgba(0, 168, 107, 0.1));
+            border: 1px solid rgba(0, 102, 204, 0.3);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .language-selector {
+            margin-top: auto;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .language-selector select {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h2 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            flex: 1;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 16px 20px;
+            border-radius: 16px;
+            line-height: 1.6;
+            animation: messageSlide 0.3s ease;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .message-content {
+            font-size: 15px;
+        }
+
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .chat-input-container {
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            font-size: 15px;
+            resize: none;
+            min-height: 56px;
+            max-height: 150px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .send-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        /* Subject Selection */
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .subject-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 102, 204, 0.2);
+        }
+
+        .subject-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 16px;
+        }
+
+        .subject-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .subject-card p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Progress Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Teacher Tools */
+        .tools-container {
+            padding: 24px;
+        }
+
+        .tool-section {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .tool-section h3 {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Loading States */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .main-app {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="particles" id="particles"></div>
+    </div>
+
+    <!-- Auth Container -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <div class="logo">
+                <div class="logo-icon">📚</div>
+                <h1>IMENA Teacher AI</h1>
+                <p>Empowering Rwandan Education with Intelligent Learning</p>
+            </div>
+
+            <div class="error-message" id="authError"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn">Sign In</button>
+                <div class="auth-switch">
+                    Don't have an account? <a href="#" onclick="showRegister()">Create one</a>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="regEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="Create a password (min 6 characters)" required minlength="6">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>I am a</label>
+                        <select id="regRole" required>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Education Level</label>
+                        <select id="regLevel" required>
+                            <option value="P1">Primary 1</option>
+                            <option value="P2">Primary 2</option>
+                            <option value="P3">Primary 3</option>
+                            <option value="P4">Primary 4</option>
+                            <option value="P5">Primary 5</option>
+                            <option value="P6">Primary 6</option>
+                            <option value="S1">Secondary 1</option>
+                            <option value="S2">Secondary 2</option>
+                            <option value="S3">Secondary 3</option>
+                            <option value="S4">Secondary 4</option>
+                            <option value="S5">Secondary 5</option>
+                            <option value="S6">Secondary 6</option>
+                            <option value="L5">Level 5 (TTC)</option>
+                            <option value="Y3">Year 3 (TTC)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Language</label>
+                    <select id="regLanguage" required>
+                        <option value="english">🇬🇧 English</option>
+                        <option value="kinyarwanda">🇷🇼 Kinyarwanda</option>
+                        <option value="kiswahili">🇹🇿 Kiswahili</option>
+                        <option value="french">🇫🇷 French</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Create Account</button>
+                <div class="auth-switch">
+                    Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="app-container hidden" id="mainApp">
+        <div class="main-app">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatar">U</div>
+                    <div class="user-info">
+                        <h3 id="userName">User</h3>
+                        <p id="userRole">Student</p>
+                    </div>
+                </div>
+
+                <nav class="nav-menu">
+                    <div class="nav-item active" onclick="showSection('chat')">
+                        <span class="nav-icon">💬</span>
+                        <span>Learn with IMENA</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('subjects')">
+                        <span class="nav-icon">📖</span>
+                        <span>Subjects</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('progress')">
+                        <span class="nav-icon">📊</span>
+                        <span>My Progress</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('history')">
+                        <span class="nav-icon">🕐</span>
+                        <span>History</span>
+                    </div>
+                    <div class="nav-item teacher-only hidden" onclick="showSection('teacher-tools')">
+                        <span class="nav-icon">🛠️</span>
+                        <span>Teacher Tools</span>
+                    </div>
+                </nav>
+
+                <div class="language-selector">
+                    <label>Language / Ururimi / Lugha / Langue</label>
+                    <select id="appLanguage" onchange="changeLanguage(this.value)">
+                        <option value="english">🇬🇧 English</option>
+                        <option value="kinyarwanda">🇷🇼 Kinyarwanda</option>
+                        <option value="kiswahili">🇹🇿 Kiswahili</option>
+                        <option value="french">🇫🇷 French</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-secondary" onclick="logout()" style="margin-top: 16px;">
+                    <span>🚪</span> Logout
+                </button>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Chat Section -->
+                <div id="chatSection" class="content-section">
+                    <div class="content-header">
+                        <div class="header-title">
+                            <h2 id="chatTitle">Start Learning</h2>
+                            <p id="chatSubtitle">Select a subject or ask me anything about your studies</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-small btn-secondary" onclick="showSection('subjects')">
+                                📚 Change Subject
+                            </button>
+                            <button class="btn btn-small" onclick="newSession()">
+                                ➕ New Session
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message assistant">
+                                <div class="message-header">
+                                    <span>🎓</span>
+                                    <span>IMENA Teacher AI</span>
+                                </div>
+                                <div class="message-content" id="welcomeMessage">
+                                    Welcome! I'm IMENA, your REB curriculum-aligned learning companion. 
+                                    I can help you with Mathematics, Sciences, Languages, and all subjects 
+                                    in the Rwanda Education Board syllabus. What would you like to learn today?
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <textarea 
+                                class="chat-input" 
+                                id="messageInput" 
+                                placeholder="Ask me anything about your studies..."
+                                rows="1"
+                                onkeydown="handleKeyDown(event)"
+                            ></textarea>
+                            <button class="btn send-btn" onclick="sendMessage()">
+                                ➤
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects Section -->
+                <div id="subjectsSection" class="content-section hidden">
+                    <div class="content-header">
+                        <div class="header-title">
+                            <h2>Choose a Subject</h2>
+                            <p>Select a subject aligned with REB curriculum</p>
+                        </div>
+                    </div>
+                    <div class="subjects-grid" id="subjectsGrid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Progress Section -->
+                <div id="progressSection" class="content-section hidden">
+                    <div class="content-header">
+                        <div class="header-title">
+                            <h2>Your Learning Progress</h2>
+                            <p>Track your mastery across REB subjects</p>
+                        </div>
+                    </div>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div id="historySection" class="content-section hidden">
+                    <div class="content-header">
+                        <div class="header-title">
+                            <h2>Learning History</h2>
+                            <p>Your recent study sessions</p>
+                        </div>
+                    </div>
+                    <div class="tools-container" id="historyList">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Teacher Tools Section -->
+                <div id="teacherToolsSection" class="content-section hidden">
+                    <div class="content-header">
+                        <div class="header-title">
+                            <h2>Teacher Tools</h2>
+                            <p>Create lesson plans, worksheets, and assessments</p>
+                        </div>
+                    </div>
+                    <div class="tools-container">
+                        <div class="tool-section">
+                            <h3>📝 Generate Lesson Plan</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Subject</label>
+                                    <select id="toolSubject">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Class Level</label>
+                                    <select id="toolLevel">
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Topic / Objective</label>
+                                <input type="text" id="toolTopic" placeholder="e.g., Photosynthesis in Plants">
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (minutes)</label>
+                                <input type="number" id="toolDuration" value="40" min="20" max="120">
+                            </div>
+                            <button class="btn" onclick="generateLessonPlan()">Generate Lesson Plan</button>
+                        </div>
+
+                        <div class="tool-section">
+                            <h3>📄 Create Worksheet</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Subject</label>
+                                    <select id="worksheetSubject"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Number of Questions</label>
+                                    <input type="number" id="worksheetQuestions" value="10" min="5" max="50">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Specific Content Focus</label>
+                                <textarea id="worksheetFocus" placeholder="Describe what the worksheet should cover..."></textarea>
+                            </div>
+                            <button class="btn" onclick="generateWorksheet()">Create Worksheet</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION - Replace with your Supabase credentials
+        // ==========================================
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_ANON_KEY = 'your-anon-key';
+        
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Global State
+        let currentUser = null;
+        let currentProfile = null;
+        let currentSession = null;
+        let currentSubject = null;
+        let subjects = [];
+        let messages = [];
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            createParticles();
+            await checkSession();
+            setupEventListeners();
+        });
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                await loadUserProfile(session.user);
+                showMainApp();
+            } else {
+                showAuth();
+            }
+        }
+
+        function setupEventListeners() {
+            // Auth forms
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            
+            // Auto-resize textarea
+            const textarea = document.getElementById('messageInput');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            });
+        }
+
+        // ==========================================
+        // AUTHENTICATION
+        // ==========================================
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('authError').style.display = 'none';
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('authError').style.display = 'none';
+        }
+
+        function showAuth() {
+            document.getElementById('authContainer').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            initializeApp();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showError('');
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+            
+            if (error) {
+                showError(error.message);
+                return;
+            }
+            
+            await loadUserProfile(data.user);
+            showMainApp();
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const fullName = document.getElementById('regName').value;
+            const role = document.getElementById('regRole').value;
+            const level = document.getElementById('regLevel').value;
+            const language = document.getElementById('regLanguage').value;
+            
+            showError('');
+            
+            // Create auth user
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password
+            });
+            
+            if (authError) {
+                showError(authError.message);
+                return;
+            }
+            
+            // Create profile
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([{
+                    id: authData.user.id,
+                    full_name: fullName,
+                    role: role,
+                    education_level: level,
+                    preferred_language: language
+                }]);
+            
+            if (profileError) {
+                showError('Account created but profile setup failed. Please contact support.');
+                return;
+            }
+            
+            await loadUserProfile(authData.user);
+            showMainApp();
+        }
+
+        async function loadUserProfile(user) {
+            currentUser = user;
+            
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            
+            if (error) {
+                console.error('Error loading profile:', error);
+                return;
+            }
+            
+            currentProfile = profile;
+            
+            // Update UI
+            document.getElementById('userName').textContent = profile.full_name;
+            document.getElementById('userRole').textContent = profile.role === 'teacher' ? 'Teacher' : 'Student';
+            document.getElementById('userAvatar').textContent = profile.full_name.charAt(0).toUpperCase();
+            document.getElementById('appLanguage').value = profile.preferred_language;
+            
+            // Show teacher tools if applicable
+            if (profile.role === 'teacher') {
+                document.querySelector('.teacher-only').classList.remove('hidden');
+            }
+            
+            // Update welcome message based on language
+            updateWelcomeMessage(profile.preferred_language);
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('authError');
+            if (message) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            } else {
+                errorEl.style.display = 'none';
+            }
+        }
+
+        async function logout() {
+            await supabase.auth.signOut();
+            currentUser = null;
+            currentProfile = null;
+            showAuth();
+        }
+
+        // ==========================================
+        // APP INITIALIZATION
+        // ==========================================
+        async function initializeApp() {
+            await loadSubjects();
+            await loadProgress();
+            await loadHistory();
+            
+            // Set current subject if in URL params or default
+            const urlParams = new URLSearchParams(window.location.search);
+            const subjectId = urlParams.get('subject');
+            if (subjectId) {
+                selectSubject(parseInt(subjectId));
+            }
+        }
+
+        async function loadSubjects() {
+            const { data, error } = await supabase
+                .from('subject_master')
+                .select('*')
+                .order('id');
+            
+            if (error) {
+                console.error('Error loading subjects:', error);
+                return;
+            }
+            
+            subjects = data;
+            renderSubjects();
+            populateSubjectSelects();
+        }
+
+        function renderSubjects() {
+            const grid = document.getElementById('subjectsGrid');
+            const userLevel = currentProfile?.education_level || 'P1';
+            
+            // Filter subjects applicable to user's level
+            const applicableSubjects = subjects.filter(s => 
+                s.applicable_levels.includes(userLevel)
+            );
+            
+            grid.innerHTML = applicableSubjects.map(subject => `
+                <div class="subject-card" onclick="selectSubject(${subject.id})">
+                    <div class="subject-icon">${getSubjectEmoji(subject.category)}</div>
+                    <h3>${getSubjectName(subject)}</h3>
+                    <p>${getSubjectCategory(subject.category)}</p>
+                </div>
+            `).join('');
+        }
+
+        function getSubjectEmoji(category) {
+            const emojis = {
+                'languages': '🗣️',
+                'sciences': '🔬',
+                'humanities': '📜',
+                'arts': '🎨',
+                'technical': '⚙️',
+                'religion': '⛪'
+            };
+            return emojis[category] || '📚';
+        }
+
+        function getSubjectName(subject) {
+            const lang = currentProfile?.preferred_language || 'english';
+            if (lang === 'kinyarwanda' && subject.name_rw) return subject.name_rw;
+            if (lang === 'kiswahili' && subject.name_sw) return subject.name_sw;
+            if (lang === 'french' && subject.name_fr) return subject.name_fr;
+            return subject.name_en;
+        }
+
+        function getSubjectCategory(category) {
+            const categories = {
+                'languages': 'Languages / Indimi / Lugha / Langues',
+                'sciences': 'Sciences / Isayansi / Sayansi / Sciences',
+                'humanities': 'Humanities / Ubukungu / Binadamu / Sciences Humaines',
+                'arts': 'Arts & Sports / Ubuhanzi / Sanaa / Arts',
+                'technical': 'Technical / Ikoranabuhanga / Ufundi / Technique',
+                'religion': 'Religion / Idini / Dini / Religion'
+            };
+            return categories[category] || category;
+        }
+
+        function populateSubjectSelects() {
+            const selects = ['toolSubject', 'worksheetSubject'];
+            const options = subjects.map(s => 
+                `<option value="${s.id}">${s.name_en}</option>`
+            ).join('');
+            
+            selects.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = options;
+            });
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Show selected
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget?.classList.add('active');
+            
+            // Refresh data if needed
+            if (section === 'progress') loadProgress();
+            if (section === 'history') loadHistory();
+        }
+
+        // ==========================================
+        // CHAT FUNCTIONALITY
+        // ==========================================
+        async function selectSubject(subjectId) {
+            currentSubject = subjects.find(s => s.id === subjectId);
+            
+            // Create new learning session
+            const { data: session, error } = await supabase
+                .from('learning_sessions')
+                .insert([{
+                    user_id: currentUser.id,
+                    subject_id: subjectId,
+                    session_type: 'lesson',
+                    title: `${getSubjectName(currentSubject)} - ${new Date().toLocaleDateString()}`,
+                    language_used: currentProfile.preferred_language
+                }])
+                .select()
+                .single();
+            
+            if (error) {
+                console.error('Error creating session:', error);
+                return;
+            }
+            
+            currentSession = session;
+            
+            // Update UI
+            document.getElementById('chatTitle').textContent = getSubjectName(currentSubject);
+            document.getElementById('chatSubtitle').textContent = 'REB Curriculum Aligned Learning';
+            
+            // Clear messages and add welcome
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="message assistant">
+                    <div class="message-header">
+                        <span>🎓</span>
+                        <span>IMENA Teacher AI</span>
+                    </div>
+                    <div class="message-content">
+                        ${getSubjectWelcome(currentSubject)}
+                    </div>
+                </div>
+            `;
+            
+            showSection('chat');
+        }
+
+        function getSubjectWelcome(subject) {
+            const lang = currentProfile?.preferred_language || 'english';
+            const name = getSubjectName(subject);
+            
+            const welcomes = {
+                english: `Welcome to ${name}! I'm ready to help you master this subject following the REB curriculum. What topic would you like to explore? I can explain concepts, give you exercises, or help with homework.`,
+                kinyarwanda: `Murakaza neza mu ${name}! Niteguye kugufasha gusobanukirwa n'iyi somo ukurikije gahunda y'imyigire y'Ikigo cy'Igihugu cy'Uburere (REB). Ni ikihe tukwiga? Nshobora gusobanura ibintu, kuguha imyitozo, cyangwa kugufasha mu bikorwa byo mu rugo.`,
+                kiswahili: `Karibu kwenye ${name}! Niko tayari kukusaidia kuelewa somo hili kufuata mtaala wa REB. Ungependa kujifunza nini? Naweza kufafanua mawazo, kukupa mazoezi, au kukusaidia kazi ya nyumbani.`,
+                french: `Bienvenue en ${name}! Je suis prêt à vous aider à maîtriser cette matière selon le programme REB. Quel sujet souhaitez-vous explorer? Je peux expliquer des concepts, vous donner des exercices ou aider avec les devoirs.`
+            };
+            
+            return welcomes[lang] || welcomes.english;
+        }
+
+        async function newSession() {
+            currentSession = null;
+            currentSubject = null;
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="message assistant">
+                    <div class="message-header">
+                        <span>🎓</span>
+                        <span>IMENA Teacher AI</span>
+                    </div>
+                    <div class="message-content" id="welcomeMessage">
+                        ${getGenericWelcome()}
+                    </div>
+                </div>
+            `;
+            document.getElementById('chatTitle').textContent = 'Start Learning';
+            document.getElementById('chatSubtitle').textContent = 'Select a subject or ask me anything about your studies';
+        }
+
+        function getGenericWelcome() {
+            const lang = currentProfile?.preferred_language || 'english';
+            const welcomes = {
+                english: "Welcome! I'm IMENA, your REB curriculum-aligned learning companion. I can help you with Mathematics, Sciences, Languages, and all subjects in the Rwanda Education Board syllabus. What would you like to learn today?",
+                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire ukurikije gahunda y'imyigire y'Ikigo cy'Igihugu cy'Uburere (REB). Nshobora kugufasha muri Matematika, Isayansi, Indimi, n'indi somo byose. Urashaka kwiga iki uyumunsi?",
+                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza anayefuata mtaala wa REB. Ninaweza kukusaidia katika Hisabati, Sayansi, Lugha, na masomo yote. Ungependa kujifunza nini leo?",
+                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage aligné sur le programme REB. Je peux vous aider en Mathématiques, Sciences, Langues et toutes les matières. Que souhaitez-vous apprendre aujourd'hui?"
+            };
+            return welcomes[lang];
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            // Add user message to UI
+            addMessageToUI('user', content);
+            input.value = '';
+            input.style.height = 'auto';
+            
+            // Save to database
+            await saveMessage('user', content);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Get AI response
+            const response = await getAIResponse(content);
+            
+            // Remove typing indicator and add response
+            removeTypingIndicator();
+            addMessageToUI('assistant', response);
+            await saveMessage('assistant', response);
+            
+            // Update progress
+            await updateProgress();
+        }
+
+        function addMessageToUI(role, content) {
+            const container = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const header = role === 'user' ? 
+                `<div class="message-header"><span>👤</span><span>You</span></div>` :
+                `<div class="message-header"><span>🎓</span><span>IMENA Teacher AI</span></div>`;
+            
+            // Process markdown-like formatting
+            let formattedContent = content
+                .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            messageDiv.innerHTML = header + `<div class="message-content">${formattedContent}</div>`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const indicator = document.createElement('div');
+            indicator.className = 'message assistant typing';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `
+                <div class="message-header">
+                    <span>🎓</span>
+                    <span>IMENA Teacher AI</span>
+                </div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            container.appendChild(indicator);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function saveMessage(role, content) {
+            if (!currentSession) {
+                // Create general session if none exists
+                const { data: session } = await supabase
+                    .from('learning_sessions')
+                    .insert([{
+                        user_id: currentUser.id,
+                        session_type: 'lesson',
+                        title: 'General Learning',
+                        language_used: currentProfile.preferred_language
+                    }])
+                    .select()
+                    .single();
+                currentSession = session;
+            }
+            
+            const { error } = await supabase
+                .from('messages')
+                .insert([{
+                    session_id: currentSession.id,
+                    user_id: currentUser.id,
+                    role: role,
+                    content: content,
+                    language: currentProfile.preferred_language
+                }]);
+            
+            if (error) console.error('Error saving message:', error);
+        }
+
+        async function getAIResponse(userMessage) {
+            // This is where you integrate with your AI API (OpenAI, Claude, etc.)
+            // For now, returning a simulated response based on REB curriculum
+            
+            const lang = currentProfile?.preferred_language || 'english';
+            const level = currentProfile?.education_level || 'S1';
+            
+            // Build system prompt
+            const systemPrompt = buildSystemPrompt(lang, level);
+            
+            // In production, make API call here:
+            /*
+            const response = await fetch('YOUR_AI_API_ENDPOINT', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer YOUR_API_KEY'
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userMessage }
+                    ]
+                })
+            });
+            const data = await response.json();
+            return data.choices[0].message.content;
+            */
+            
+            // Simulated response for demonstration
+            return simulateResponse(userMessage, lang, level);
+        }
+
+        function buildSystemPrompt(lang, level) {
+            return `You are IMENA Teacher AI, a professional educational assistant for Rwanda Basic Education Board (REB) curriculum. 
+            Language: ${lang}. Student Level: ${level}.
+            Rules:
+            1. Only teach REB-aligned content
+            2. Adapt explanation depth for ${level} level
+            3. Use step-by-step explanations
+            4. Provide exercises after explanations
+            5. Use Rwandan context in examples
+            6. Respond in ${lang} primarily
+            7. Be professional and encouraging`;
+        }
+
+        function simulateResponse(message, lang, level) {
+            // This is a placeholder - replace with actual AI integration
+            const responses = {
+                english: `I understand you're asking about "${message}". As your IMENA Teacher AI, I'm here to help you understand this topic following the REB ${level} curriculum.
+
+**Learning Objective:** Understand the core concepts and apply them in practical situations.
+
+**Explanation:**
+Let me break this down into simple steps:
+1. First, we need to understand the fundamental principles
+2. Then, we'll look at how they apply in real-world Rwandan contexts
+3. Finally, we'll practice with some exercises
+
+**Example:**
+Consider a scenario from our local context in Rwanda...
+
+**Practice Exercise:**
+Try this problem: [Exercise would be generated here based on level ${level}]
+
+Would you like me to explain any part in more detail, or shall we move to more practice questions?
+
+Komeza kwiga n'IMENA Teacher AI!`,
+                
+                kinyarwanda: `Ndasobanukiwe ko uribaza ibijyanye na "${message}". Nk'umufasha wawe IMENA, ndi hano kugufasha gusobanukirwa n'iki kibazo ukurikije gahunda y'imyigire ya REB ${level}.
+
+**Intego y'imyigire:** Gusobanukirwa n'ibishingiro no kubikoresha mu bihe by'ukuri.
+
+**Sobanuro:**
+Reka tuyisobanure mu ngingo:
+1. Mbere na mbere, tugomba gusobanukirwa n'ibishingiro
+2. Hanyuma, tuzareba uko byakoreshwa mu Rwanda
+3. Hanyuma, tuzagerageza imyitozo
+
+**Urugero:**
+Tekereza ibyo tubona mu Rwanda...
+
+**Imyitozo:**
+Gerageza iki kibazo: [Imyitozo yabugenewe ${level}]
+
+Urashaka ko nsobanura birambuye, cyangwa twongere imyitozo?
+
+Komeza kwiga n'IMENA Teacher AI!`
+            };
+            
+            return responses[lang] || responses.english;
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // ==========================================
+        // PROGRESS TRACKING
+        // ==========================================
+        async function loadProgress() {
+            const { data, error } = await supabase
+                .from('progress')
+                .select('*, subject_master(*)')
+                .eq('user_id', currentUser.id)
+                .order('updated_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading progress:', error);
+                return;
+            }
+            
+            renderProgress(data || []);
+        }
+
+        function renderProgress(progressData) {
+            const grid = document.getElementById('statsGrid');
+            
+            if (progressData.length === 0) {
+                grid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Get Started</span>
+                        </div>
+                        <div class="stat-value">0%</div>
+                        <p style="color: var(--text-secondary); margin-top: 8px;">Start learning to track your progress!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = progressData.map(p => `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">${p.subject_master?.name_en || 'Subject'}</span>
+                        <span style="color: ${p.mastery_percentage >= 70 ? 'var(--success)' : p.mastery_percentage >= 40 ? 'var(--warning)' : 'var(--error)'}">
+                            ${p.revision_needed ? '⚠️ Revision Needed' : '✓ On Track'}
+                        </span>
+                    </div>
+                    <div class="stat-value">${Math.round(p.mastery_percentage)}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${p.mastery_percentage}%"></div>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">
+                        ${p.exercises_attempted} exercises attempted • ${p.time_spent_minutes} mins studied
+                    </p>
+                </div>
+            `).join('');
+        }
+
+        async function updateProgress() {
+            if (!currentSubject) return;
+            
+            // Calculate progress based on session
+            const { data: existing } = await supabase
+                .from('progress')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('subject_id', currentSubject.id)
+                .single();
+            
+            if (existing) {
+                await supabase
+                    .from('progress')
+                    .update({
+                        exercises_attempted: existing.exercises_attempted + 1,
+                        time_spent_minutes: existing.time_spent_minutes + 5,
+                        last_studied_at: new Date().toISOString()
+                    })
+                    .eq('id', existing.id);
+            } else {
+                await supabase
+                    .from('progress')
+                    .insert([{
+                        user_id: currentUser.id,
+                        subject_id: currentSubject.id,
+                        level: currentProfile.education_level,
+                        exercises_attempted: 1,
+                        time_spent_minutes: 5
+                    }]);
+            }
+        }
+
+        // ==========================================
+        // HISTORY
+        // ==========================================
+        async function loadHistory() {
+            const { data, error } = await supabase
+                .from('learning_sessions')
+                .select('*, subject_master(name_en)')
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false })
+                .limit(20);
+            
+            if (error) {
+                console.error('Error loading history:', error);
+                return;
+            }
+            
+            renderHistory(data || []);
+        }
+
+        function renderHistory(sessions) {
+            const container = document.getElementById('historyList');
+            
+            if (sessions.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No learning sessions yet. Start learning!</p>';
+                return;
+            }
+            
+            container.innerHTML = sessions.map(s => `
+                <div class="tool-section" style="cursor: pointer;" onclick="resumeSession('${s.id}')">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4>${s.title}</h4>
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                                ${s.subject_master?.name_en || 'General'} • ${new Date(s.created_at).toLocaleDateString()} • ${s.status}
+                            </p>
+                        </div>
+                        <span style="font-size: 24px;">➔</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function resumeSession(sessionId) {
+            const { data: session } = await supabase
+                .from('learning_sessions')
+                .select('*, subject_master(*)')
+                .eq('id', sessionId)
+                .single();
+            
+            if (session) {
+                currentSession = session;
+                currentSubject = session.subject_master;
+                
+                // Load messages
+                const { data: messages } = await supabase
+                    .from('messages')
+                    .select('*')
+                    .eq('session_id', sessionId)
+                    .order('created_at', { ascending: true });
+                
+                // Clear and rebuild chat
+                const container = document.getElementById('chatMessages');
+                container.innerHTML = '';
+                
+                messages?.forEach(m => {
+                    addMessageToUI(m.role, m.content);
+                });
+                
+                document.getElementById('chatTitle').textContent = session.title;
+                showSection('chat');
+            }
+        }
+
+        // ==========================================
+        // TEACHER TOOLS
+        // ==========================================
+        async function generateLessonPlan() {
+            const subject = document.getElementById('toolSubject').value;
+            const level = document.getElementById('toolLevel').value;
+            const topic = document.getElementById('toolTopic').value;
+            const duration = document.getElementById('toolDuration').value;
+            
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+            
+            // Generate using AI
+            const prompt = `Create a detailed lesson plan for REB ${level} ${subject} on "${topic}" for ${duration} minutes. Include: objectives, materials, introduction, development, conclusion, and assessment.`;
+            
+            // In production, call AI API here
+            const lessonPlan = await getAIResponse(prompt);
+            
+            // Save to teacher resources
+            await supabase
+                .from('teacher_resources')
+                .insert([{
+                    teacher_id: currentUser.id,
+                    resource_type: 'lesson_plan',
+                    subject_id: subject,
+                    level: level,
+                    title: `Lesson Plan: ${topic}`,
+                    content: lessonPlan,
+                    language: currentProfile.preferred_language
+                }]);
+            
+            alert('Lesson plan generated and saved!');
+        }
+
+        async function generateWorksheet() {
+            const subject = document.getElementById('worksheetSubject').value;
+            const questions = document.getElementById('worksheetQuestions').value;
+            const focus = document.getElementById('worksheetFocus').value;
+            
+            const prompt = `Create a worksheet with ${questions} questions for ${subject} focusing on: ${focus}. Include answer key.`;
+            
+            const worksheet = await getAIResponse(prompt);
+            
+            await supabase
+                .from('teacher_resources')
+                .insert([{
+                    teacher_id: currentUser.id,
+                    resource_type: 'worksheet',
+                    subject_id: subject,
+                    level: currentProfile.education_level,
+                    title: `Worksheet: ${focus}`,
+                    content: worksheet,
+                    language: currentProfile.preferred_language
+                }]);
+            
+            alert('Worksheet generated and saved!');
+        }
+
+        // ==========================================
+        // UTILITIES
+        // ==========================================
+        function changeLanguage(lang) {
+            currentProfile.preferred_language = lang;
+            updateWelcomeMessage(lang);
+            
+            // Update in database
+            supabase
+                .from('profiles')
+                .update({ preferred_language: lang })
+                .eq('id', currentUser.id);
+        }
+
+        function updateWelcomeMessage(lang) {
+            const welcomes = {
+                english: "Welcome! I'm IMENA, your REB curriculum-aligned learning companion.",
+                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire ukurikije gahunda ya REB.",
+                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza anayefuata mtaala wa REB.",
+                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage aligné sur le programme REB."
+            };
+            
+            const el = document.getElementById('welcomeMessage');
+            if (el) el.textContent = welcomes[lang];
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
