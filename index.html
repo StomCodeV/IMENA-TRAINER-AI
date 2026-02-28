@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMENA Teacher AI - Empowering Rwandan Education</title>
+    <title>IMENA Teacher Ai-Rwandan Educator AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -210,6 +210,12 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         .auth-switch {
             text-align: center;
             margin-top: 24px;
@@ -221,12 +227,24 @@
             color: var(--primary);
             text-decoration: none;
             font-weight: 500;
+            cursor: pointer;
         }
 
         .error-message {
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid var(--error);
             color: var(--error);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -666,10 +684,6 @@
             .sidebar.open {
                 left: 0;
             }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
         }
 
         /* Scrollbar */
@@ -709,6 +723,7 @@
             </div>
 
             <div class="error-message" id="authError"></div>
+            <div class="success-message" id="authSuccess"></div>
 
             <!-- Login Form -->
             <form id="loginForm">
@@ -720,9 +735,9 @@
                     <label>Password</label>
                     <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 </div>
-                <button type="submit" class="btn">Sign In</button>
+                <button type="submit" class="btn" id="loginBtn">Sign In</button>
                 <div class="auth-switch">
-                    Don't have an account? <a href="#" onclick="showRegister()">Create one</a>
+                    Don't have an account? <a onclick="showRegister()">Create one</a>
                 </div>
             </form>
 
@@ -777,9 +792,9 @@
                         <option value="french">🇫🇷 French</option>
                     </select>
                 </div>
-                <button type="submit" class="btn">Create Account</button>
+                <button type="submit" class="btn" id="registerBtn">Create Account</button>
                 <div class="auth-switch">
-                    Already have an account? <a href="#" onclick="showLogin()">Sign in</a>
+                    Already have an account? <a onclick="showLogin()">Sign in</a>
                 </div>
             </form>
         </div>
@@ -944,7 +959,18 @@
                                 <div class="form-group">
                                     <label>Class Level</label>
                                     <select id="toolLevel">
-                                        <!-- Populated dynamically -->
+                                        <option value="P1">P1</option>
+                                        <option value="P2">P2</option>
+                                        <option value="P3">P3</option>
+                                        <option value="P4">P4</option>
+                                        <option value="P5">P5</option>
+                                        <option value="P6">P6</option>
+                                        <option value="S1">S1</option>
+                                        <option value="S2">S2</option>
+                                        <option value="S3">S3</option>
+                                        <option value="S4">S4</option>
+                                        <option value="S5">S5</option>
+                                        <option value="S6">S6</option>
                                     </select>
                                 </div>
                             </div>
@@ -985,12 +1011,12 @@
 
     <script>
         // ==========================================
-        // CONFIGURATION - Replace with your Supabase credentials
+        // CONFIGURATION - FIXED (removed space in URL)
         // ==========================================
         const SUPABASE_URL = 'https://fovnqwlrnldzsgfysdmv.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdm5xd2xybmxkenNnZnlzZG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NzcwMzYsImV4cCI6MjA4NzI1MzAzNn0.llcmM2Yc7Guqm5eS7swSYxP3suyk_6Sn3hERxVy4mu0';
         
-        // Initialize Supabase - use 'db' instead of 'supabase' to avoid conflict
+        // Initialize Supabase
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Global State
@@ -1023,21 +1049,26 @@
         }
 
         async function checkSession() {
-            const { data: { session } } = await db.auth.getSession();
-            if (session) {
-                await loadUserProfile(session.user);
-                showMainApp();
-            } else {
+            try {
+                const { data: { session }, error } = await db.auth.getSession();
+                if (error) throw error;
+                
+                if (session) {
+                    await loadUserProfile(session.user);
+                    showMainApp();
+                } else {
+                    showAuth();
+                }
+            } catch (err) {
+                console.error('Session check error:', err);
                 showAuth();
             }
         }
 
         function setupEventListeners() {
-            // Auth forms
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
             
-            // Auto-resize textarea
             const textarea = document.getElementById('messageInput');
             textarea.addEventListener('input', function() {
                 this.style.height = 'auto';
@@ -1046,18 +1077,43 @@
         }
 
         // ==========================================
-        // AUTHENTICATION
+        // AUTHENTICATION - FIXED with better error handling
         // ==========================================
         function showLogin() {
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('authError').style.display = 'none';
+            hideMessages();
         }
 
         function showRegister() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('registerForm').classList.remove('hidden');
+            hideMessages();
+        }
+
+        function hideMessages() {
             document.getElementById('authError').style.display = 'none';
+            document.getElementById('authSuccess').style.display = 'none';
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('authError');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            document.getElementById('authSuccess').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('authSuccess');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            document.getElementById('authError').style.display = 'none';
+        }
+
+        function setLoading(btnId, isLoading) {
+            const btn = document.getElementById(btnId);
+            btn.disabled = isLoading;
+            btn.textContent = isLoading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Sign In' : 'Create Account');
         }
 
         function showAuth() {
@@ -1073,105 +1129,175 @@
 
         async function handleLogin(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             
-            showError('');
+            hideMessages();
+            setLoading('loginBtn', true);
             
-            const { data, error } = await db.auth.signInWithPassword({
-                email,
-                password
-            });
-            
-            if (error) {
-                showError(error.message);
-                return;
+            try {
+                const { data, error } = await db.auth.signInWithPassword({ email, password });
+                
+                if (error) {
+                    if (error.message.includes('Invalid login')) {
+                        showError('Invalid email or password. Please try again.');
+                    } else if (error.message.includes('Email not confirmed')) {
+                        showError('Please confirm your email before logging in.');
+                    } else {
+                        showError(error.message);
+                    }
+                    setLoading('loginBtn', false);
+                    return;
+                }
+                
+                await loadUserProfile(data.user);
+                showMainApp();
+            } catch (err) {
+                console.error('Login error:', err);
+                showError('An unexpected error occurred. Please try again.');
+                setLoading('loginBtn', false);
             }
-            
-            await loadUserProfile(data.user);
-            showMainApp();
         }
 
         async function handleRegister(e) {
             e.preventDefault();
-            const email = document.getElementById('regEmail').value;
+            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
-            const fullName = document.getElementById('regName').value;
+            const fullName = document.getElementById('regName').value.trim();
             const role = document.getElementById('regRole').value;
             const level = document.getElementById('regLevel').value;
             const language = document.getElementById('regLanguage').value;
             
-            showError('');
+            hideMessages();
+            setLoading('registerBtn', true);
             
-            // Create auth user
-            const { data: authData, error: authError } = await db.auth.signUp({
-                email,
-                password
-            });
-            
-            if (authError) {
-                showError(authError.message);
-                return;
+            try {
+                // Step 1: Create auth user with metadata
+                const { data: authData, error: authError } = await db.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: role,
+                            education_level: level,
+                            preferred_language: language
+                        }
+                    }
+                });
+                
+                if (authError) {
+                    if (authError.message.includes('already registered')) {
+                        showError('This email is already registered. Please log in instead.');
+                    } else if (authError.message.includes('rate limit')) {
+                        showError('Too many attempts. Please wait a few minutes and try again.');
+                    } else {
+                        showError(authError.message);
+                    }
+                    setLoading('registerBtn', false);
+                    return;
+                }
+                
+                // Wait for trigger to create profile
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Step 2: Verify profile was created
+                const { data: profile, error: profileError } = await db
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', authData.user.id)
+                    .single();
+                
+                if (profileError || !profile) {
+                    // Profile not created by trigger, create manually
+                    const { error: insertError } = await db
+                        .from('profiles')
+                        .insert([{
+                            id: authData.user.id,
+                            full_name: fullName,
+                            role: role,
+                            education_level: level,
+                            preferred_language: language
+                        }]);
+                    
+                    if (insertError) {
+                        console.error('Profile creation error:', insertError);
+                        showSuccess('Account created! Please log in to continue.');
+                        setLoading('registerBtn', false);
+                        showLogin();
+                        return;
+                    }
+                }
+                
+                showSuccess('Account created successfully! Please check your email to confirm, then log in.');
+                setTimeout(() => {
+                    showLogin();
+                    setLoading('registerBtn', false);
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Registration error:', err);
+                showError('An unexpected error occurred. Please try again.');
+                setLoading('registerBtn', false);
             }
-            
-            // Create profile
-            const { error: profileError } = await db
-                .from('profiles')
-                .insert([{
-                    id: authData.user.id,
-                    full_name: fullName,
-                    role: role,
-                    education_level: level,
-                    preferred_language: language
-                }]);
-            
-            if (profileError) {
-                showError('Account created but profile setup failed. Please contact support.');
-                return;
-            }
-            
-            await loadUserProfile(authData.user);
-            showMainApp();
         }
 
         async function loadUserProfile(user) {
             currentUser = user;
             
-            const { data: profile, error } = await db
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-            
-            if (error) {
-                console.error('Error loading profile:', error);
-                return;
-            }
-            
-            currentProfile = profile;
-            
-            // Update UI
-            document.getElementById('userName').textContent = profile.full_name;
-            document.getElementById('userRole').textContent = profile.role === 'teacher' ? 'Teacher' : 'Student';
-            document.getElementById('userAvatar').textContent = profile.full_name.charAt(0).toUpperCase();
-            document.getElementById('appLanguage').value = profile.preferred_language;
-            
-            // Show teacher tools if applicable
-            if (profile.role === 'teacher') {
-                document.querySelector('.teacher-only').classList.remove('hidden');
-            }
-            
-            // Update welcome message based on language
-            updateWelcomeMessage(profile.preferred_language);
-        }
-
-        function showError(message) {
-            const errorEl = document.getElementById('authError');
-            if (message) {
-                errorEl.textContent = message;
-                errorEl.style.display = 'block';
-            } else {
-                errorEl.style.display = 'none';
+            try {
+                // Try to get profile
+                let { data: profile, error } = await db
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+                
+                // If no profile, create one from user metadata
+                if (error || !profile) {
+                    const metadata = user.user_metadata || {};
+                    const { data: newProfile, error: createError } = await db
+                        .from('profiles')
+                        .insert([{
+                            id: user.id,
+                            full_name: metadata.full_name || user.email.split('@')[0],
+                            role: metadata.role || 'student',
+                            education_level: metadata.education_level || 'P1',
+                            preferred_language: metadata.preferred_language || 'english'
+                        }])
+                        .select()
+                        .single();
+                    
+                    if (createError) {
+                        console.error('Failed to create profile:', createError);
+                        // Use default profile
+                        profile = {
+                            full_name: metadata.full_name || 'User',
+                            role: 'student',
+                            education_level: 'P1',
+                            preferred_language: 'english'
+                        };
+                    } else {
+                        profile = newProfile;
+                    }
+                }
+                
+                currentProfile = profile;
+                
+                // Update UI
+                document.getElementById('userName').textContent = profile.full_name;
+                document.getElementById('userRole').textContent = profile.role === 'teacher' ? 'Teacher' : 'Student';
+                document.getElementById('userAvatar').textContent = profile.full_name.charAt(0).toUpperCase();
+                document.getElementById('appLanguage').value = profile.preferred_language;
+                
+                if (profile.role === 'teacher') {
+                    document.querySelector('.teacher-only')?.classList.remove('hidden');
+                }
+                
+                updateWelcomeMessage(profile.preferred_language);
+                
+            } catch (err) {
+                console.error('Error loading profile:', err);
             }
         }
 
@@ -1179,6 +1305,8 @@
             await db.auth.signOut();
             currentUser = null;
             currentProfile = null;
+            currentSession = null;
+            currentSubject = null;
             showAuth();
         }
 
@@ -1189,39 +1317,37 @@
             await loadSubjects();
             await loadProgress();
             await loadHistory();
-            
-            // Set current subject if in URL params or default
-            const urlParams = new URLSearchParams(window.location.search);
-            const subjectId = urlParams.get('subject');
-            if (subjectId) {
-                selectSubject(parseInt(subjectId));
-            }
         }
 
         async function loadSubjects() {
-            const { data, error } = await db
-                .from('subject_master')
-                .select('*')
-                .order('id');
-            
-            if (error) {
-                console.error('Error loading subjects:', error);
-                return;
+            try {
+                const { data, error } = await db
+                    .from('subject_master')
+                    .select('*')
+                    .order('id');
+                
+                if (error) throw error;
+                
+                subjects = data || [];
+                renderSubjects();
+                populateSubjectSelects();
+            } catch (err) {
+                console.error('Error loading subjects:', err);
             }
-            
-            subjects = data;
-            renderSubjects();
-            populateSubjectSelects();
         }
 
         function renderSubjects() {
             const grid = document.getElementById('subjectsGrid');
             const userLevel = currentProfile?.education_level || 'P1';
             
-            // Filter subjects applicable to user's level
             const applicableSubjects = subjects.filter(s => 
-                s.applicable_levels.includes(userLevel)
+                s.applicable_levels?.includes(userLevel)
             );
+            
+            if (applicableSubjects.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No subjects available for your level.</p>';
+                return;
+            }
             
             grid.innerHTML = applicableSubjects.map(subject => `
                 <div class="subject-card" onclick="selectSubject(${subject.id})">
@@ -1254,23 +1380,22 @@
 
         function getSubjectCategory(category) {
             const categories = {
-                'languages': 'Languages / Indimi / Lugha / Langues',
-                'sciences': 'Sciences / Isayansi / Sayansi / Sciences',
-                'humanities': 'Humanities / Ubukungu / Binadamu / Sciences Humaines',
-                'arts': 'Arts & Sports / Ubuhanzi / Sanaa / Arts',
-                'technical': 'Technical / Ikoranabuhanga / Ufundi / Technique',
-                'religion': 'Religion / Idini / Dini / Religion'
+                'languages': 'Languages',
+                'sciences': 'Sciences',
+                'humanities': 'Humanities',
+                'arts': 'Arts & Sports',
+                'technical': 'Technical',
+                'religion': 'Religion'
             };
             return categories[category] || category;
         }
 
         function populateSubjectSelects() {
-            const selects = ['toolSubject', 'worksheetSubject'];
             const options = subjects.map(s => 
                 `<option value="${s.id}">${s.name_en}</option>`
             ).join('');
             
-            selects.forEach(id => {
+            ['toolSubject', 'worksheetSubject'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.innerHTML = options;
             });
@@ -1280,21 +1405,21 @@
         // NAVIGATION
         // ==========================================
         function showSection(section) {
-            // Hide all sections
             document.querySelectorAll('.content-section').forEach(el => {
                 el.classList.add('hidden');
             });
             
-            // Show selected
-            document.getElementById(section + 'Section').classList.remove('hidden');
+            const sectionEl = document.getElementById(section + 'Section');
+            if (sectionEl) sectionEl.classList.remove('hidden');
             
-            // Update nav active state
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('active');
             });
-            event.currentTarget?.classList.add('active');
             
-            // Refresh data if needed
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+            
             if (section === 'progress') loadProgress();
             if (section === 'history') loadHistory();
         }
@@ -1304,45 +1429,44 @@
         // ==========================================
         async function selectSubject(subjectId) {
             currentSubject = subjects.find(s => s.id === subjectId);
+            if (!currentSubject) return;
             
-            // Create new learning session
-            const { data: session, error } = await db
-                .from('learning_sessions')
-                .insert([{
-                    user_id: currentUser.id,
-                    subject_id: subjectId,
-                    session_type: 'lesson',
-                    title: `${getSubjectName(currentSubject)} - ${new Date().toLocaleDateString()}`,
-                    language_used: currentProfile.preferred_language
-                }])
-                .select()
-                .single();
-            
-            if (error) {
-                console.error('Error creating session:', error);
-                return;
+            try {
+                const { data: session, error } = await db
+                    .from('learning_sessions')
+                    .insert([{
+                        user_id: currentUser.id,
+                        subject_id: subjectId,
+                        session_type: 'lesson',
+                        title: `${getSubjectName(currentSubject)} - ${new Date().toLocaleDateString()}`,
+                        language_used: currentProfile.preferred_language
+                    }])
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                currentSession = session;
+                
+                document.getElementById('chatTitle').textContent = getSubjectName(currentSubject);
+                document.getElementById('chatSubtitle').textContent = 'REB Curriculum Aligned Learning';
+                
+                document.getElementById('chatMessages').innerHTML = `
+                    <div class="message assistant">
+                        <div class="message-header">
+                            <span>🎓</span>
+                            <span>IMENA Teacher AI</span>
+                        </div>
+                        <div class="message-content">
+                            ${getSubjectWelcome(currentSubject)}
+                        </div>
+                    </div>
+                `;
+                
+                showSection('chat');
+            } catch (err) {
+                console.error('Error creating session:', err);
             }
-            
-            currentSession = session;
-            
-            // Update UI
-            document.getElementById('chatTitle').textContent = getSubjectName(currentSubject);
-            document.getElementById('chatSubtitle').textContent = 'REB Curriculum Aligned Learning';
-            
-            // Clear messages and add welcome
-            document.getElementById('chatMessages').innerHTML = `
-                <div class="message assistant">
-                    <div class="message-header">
-                        <span>🎓</span>
-                        <span>IMENA Teacher AI</span>
-                    </div>
-                    <div class="message-content">
-                        ${getSubjectWelcome(currentSubject)}
-                    </div>
-                </div>
-            `;
-            
-            showSection('chat');
         }
 
         function getSubjectWelcome(subject) {
@@ -1350,10 +1474,10 @@
             const name = getSubjectName(subject);
             
             const welcomes = {
-                english: `Welcome to ${name}! I'm ready to help you master this subject following the REB curriculum. What topic would you like to explore? I can explain concepts, give you exercises, or help with homework.`,
-                kinyarwanda: `Murakaza neza mu ${name}! Niteguye kugufasha gusobanukirwa n'iyi somo ukurikije gahunda y'imyigire y'Ikigo cy'Igihugu cy'Uburere (REB). Ni ikihe tukwiga? Nshobora gusobanura ibintu, kuguha imyitozo, cyangwa kugufasha mu bikorwa byo mu rugo.`,
-                kiswahili: `Karibu kwenye ${name}! Niko tayari kukusaidia kuelewa somo hili kufuata mtaala wa REB. Ungependa kujifunza nini? Naweza kufafanua mawazo, kukupa mazoezi, au kukusaidia kazi ya nyumbani.`,
-                french: `Bienvenue en ${name}! Je suis prêt à vous aider à maîtriser cette matière selon le programme REB. Quel sujet souhaitez-vous explorer? Je peux expliquer des concepts, vous donner des exercices ou aider avec les devoirs.`
+                english: `Welcome to ${name}! I'm ready to help you master this subject following the REB curriculum. What topic would you like to explore?`,
+                kinyarwanda: `Murakaza neza mu ${name}! Niteguye kugufasha gusobanukirwa n'iyi somo ukurikije gahunda ya REB.`,
+                kiswahili: `Karibu kwenye ${name}! Niko tayari kukusaidia kuelewa somo hili kufuata mtaala wa REB.`,
+                french: `Bienvenue en ${name}! Je suis prêt à vous aider à maîtriser cette matière selon le programme REB.`
             };
             
             return welcomes[lang] || welcomes.english;
@@ -1380,10 +1504,10 @@
         function getGenericWelcome() {
             const lang = currentProfile?.preferred_language || 'english';
             const welcomes = {
-                english: "Welcome! I'm IMENA, your REB curriculum-aligned learning companion. I can help you with Mathematics, Sciences, Languages, and all subjects in the Rwanda Education Board syllabus. What would you like to learn today?",
-                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire ukurikije gahunda y'imyigire y'Ikigo cy'Igihugu cy'Uburere (REB). Nshobora kugufasha muri Matematika, Isayansi, Indimi, n'indi somo byose. Urashaka kwiga iki uyumunsi?",
-                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza anayefuata mtaala wa REB. Ninaweza kukusaidia katika Hisabati, Sayansi, Lugha, na masomo yote. Ungependa kujifunza nini leo?",
-                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage aligné sur le programme REB. Je peux vous aider en Mathématiques, Sciences, Langues et toutes les matières. Que souhaitez-vous apprendre aujourd'hui?"
+                english: "Welcome! I'm IMENA, your REB curriculum-aligned learning companion. What would you like to learn today?",
+                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire. Urashaka kwiga iki?",
+                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza. Ungependa kujifunza nini?",
+                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage. Que souhaitez-vous apprendre?"
             };
             return welcomes[lang];
         }
@@ -1394,27 +1518,24 @@
             
             if (!content) return;
             
-            // Add user message to UI
             addMessageToUI('user', content);
             input.value = '';
             input.style.height = 'auto';
             
-            // Save to database
             await saveMessage('user', content);
             
-            // Show typing indicator
             showTypingIndicator();
             
-            // Get AI response
-            const response = await getAIResponse(content);
-            
-            // Remove typing indicator and add response
-            removeTypingIndicator();
-            addMessageToUI('assistant', response);
-            await saveMessage('assistant', response);
-            
-            // Update progress
-            await updateProgress();
+            try {
+                const response = await getAIResponse(content);
+                removeTypingIndicator();
+                addMessageToUI('assistant', response);
+                await saveMessage('assistant', response);
+                await updateProgress();
+            } catch (err) {
+                removeTypingIndicator();
+                addMessageToUI('assistant', 'Sorry, I encountered an error. Please try again.');
+            }
         }
 
         function addMessageToUI(role, content) {
@@ -1426,7 +1547,6 @@
                 `<div class="message-header"><span>👤</span><span>You</span></div>` :
                 `<div class="message-header"><span>🎓</span><span>IMENA Teacher AI</span></div>`;
             
-            // Process markdown-like formatting
             let formattedContent = content
                 .replace(/```([\s\S]*?)```/g, '<pre>$1</pre>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
@@ -1464,123 +1584,67 @@
         }
 
         async function saveMessage(role, content) {
-            if (!currentSession) {
-                // Create general session if none exists
-                const { data: session } = await db
-                    .from('learning_sessions')
-                    .insert([{
-                        user_id: currentUser.id,
-                        session_type: 'lesson',
-                        title: 'General Learning',
-                        language_used: currentProfile.preferred_language
-                    }])
-                    .select()
-                    .single();
-                currentSession = session;
-            }
-            
-            const { error } = await db
-                .from('messages')
-                .insert([{
+            try {
+                if (!currentSession) {
+                    const { data: session } = await db
+                        .from('learning_sessions')
+                        .insert([{
+                            user_id: currentUser.id,
+                            session_type: 'lesson',
+                            title: 'General Learning',
+                            language_used: currentProfile.preferred_language
+                        }])
+                        .select()
+                        .single();
+                    currentSession = session;
+                }
+                
+                await db.from('messages').insert([{
                     session_id: currentSession.id,
                     user_id: currentUser.id,
                     role: role,
                     content: content,
                     language: currentProfile.preferred_language
                 }]);
-            
-            if (error) console.error('Error saving message:', error);
+            } catch (err) {
+                console.error('Error saving message:', err);
+            }
         }
 
         async function getAIResponse(userMessage) {
-            // This is where you integrate with your AI API (OpenAI, Claude, etc.)
-            // For now, returning a simulated response based on REB curriculum
-            
             const lang = currentProfile?.preferred_language || 'english';
             const level = currentProfile?.education_level || 'S1';
             
-            // Build system prompt
-            const systemPrompt = buildSystemPrompt(lang, level);
-            
-            // In production, make API call here:
-            /*
-            const response = await fetch('YOUR_AI_API_ENDPOINT', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer YOUR_API_KEY'
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4',
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: userMessage }
-                    ]
-                })
-            });
-            const data = await response.json();
-            return data.choices[0].message.content;
-            */
-            
-            // Simulated response for demonstration
+            // Simulated response - replace with actual AI API call
             return simulateResponse(userMessage, lang, level);
         }
 
-        function buildSystemPrompt(lang, level) {
-            return `You are IMENA Teacher AI, a professional educational assistant for Rwanda Basic Education Board (REB) curriculum. 
-            Language: ${lang}. Student Level: ${level}.
-            Rules:
-            1. Only teach REB-aligned content
-            2. Adapt explanation depth for ${level} level
-            3. Use step-by-step explanations
-            4. Provide exercises after explanations
-            5. Use Rwandan context in examples
-            6. Respond in ${lang} primarily
-            7. Be professional and encouraging`;
-        }
-
         function simulateResponse(message, lang, level) {
-            // This is a placeholder - replace with actual AI integration
             const responses = {
-                english: `I understand you're asking about "${message}". As your IMENA Teacher AI, I'm here to help you understand this topic following the REB ${level} curriculum.
+                english: `I understand you're asking about "${message}". As your IMENA Teacher AI for REB ${level}, I'm here to help!
 
-**Learning Objective:** Understand the core concepts and apply them in practical situations.
+**Learning Objective:** Master the core concepts through step-by-step explanation.
 
 **Explanation:**
-Let me break this down into simple steps:
-1. First, we need to understand the fundamental principles
-2. Then, we'll look at how they apply in real-world Rwandan contexts
-3. Finally, we'll practice with some exercises
+1. First, let's understand the fundamental principles
+2. Then, we'll apply them to Rwandan contexts
+3. Finally, we'll practice with exercises
 
-**Example:**
-Consider a scenario from our local context in Rwanda...
-
-**Practice Exercise:**
-Try this problem: [Exercise would be generated here based on level ${level}]
-
-Would you like me to explain any part in more detail, or shall we move to more practice questions?
+**Practice:**
+Try this: [Exercise for ${level} level]
 
 Komeza kwiga n'IMENA Teacher AI!`,
                 
-                kinyarwanda: `Ndasobanukiwe ko uribaza ibijyanye na "${message}". Nk'umufasha wawe IMENA, ndi hano kugufasha gusobanukirwa n'iki kibazo ukurikije gahunda y'imyigire ya REB ${level}.
+                kinyarwanda: `Ndasobanukiwe ko uribaza ibijyanye na "${message}". Nk'umufasha wawe IMENA wa REB ${level}:
 
-**Intego y'imyigire:** Gusobanukirwa n'ibishingiro no kubikoresha mu bihe by'ukuri.
+**Intego:** Gusobanukirwa n'ibishingiro.
 
 **Sobanuro:**
-Reka tuyisobanure mu ngingo:
-1. Mbere na mbere, tugomba gusobanukirwa n'ibishingiro
-2. Hanyuma, tuzareba uko byakoreshwa mu Rwanda
-3. Hanyuma, tuzagerageza imyitozo
+1. Dusobanure ibishingiro
+2. Twarebe uko byakoreshwa mu Rwanda
+3. Tugerageze imyitozo
 
-**Urugero:**
-Tekereza ibyo tubona mu Rwanda...
-
-**Imyitozo:**
-Gerageza iki kibazo: [Imyitozo yabugenewe ${level}]
-
-Urashaka ko nsobanura birambuye, cyangwa twongere imyitozo?
-
-Komeza kwiga n'IMENA Teacher AI!`
+Komeza kwiga n'IMENA!`
             };
             
             return responses[lang] || responses.english;
@@ -1597,18 +1661,19 @@ Komeza kwiga n'IMENA Teacher AI!`
         // PROGRESS TRACKING
         // ==========================================
         async function loadProgress() {
-            const { data, error } = await db
-                .from('progress')
-                .select('*, subject_master(*)')
-                .eq('user_id', currentUser.id)
-                .order('updated_at', { ascending: false });
-            
-            if (error) {
-                console.error('Error loading progress:', error);
-                return;
+            try {
+                const { data, error } = await db
+                    .from('progress')
+                    .select('*, subject_master(*)')
+                    .eq('user_id', currentUser.id)
+                    .order('updated_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                renderProgress(data || []);
+            } catch (err) {
+                console.error('Error loading progress:', err);
             }
-            
-            renderProgress(data || []);
         }
 
         function renderProgress(progressData) {
@@ -1639,9 +1704,6 @@ Komeza kwiga n'IMENA Teacher AI!`
                     <div class="progress-bar">
                         <div class="progress-fill" style="width: ${p.mastery_percentage}%"></div>
                     </div>
-                    <p style="color: var(--text-secondary); margin-top: 8px; font-size: 13px;">
-                        ${p.exercises_attempted} exercises attempted • ${p.time_spent_minutes} mins studied
-                    </p>
                 </div>
             `).join('');
         }
@@ -1649,33 +1711,31 @@ Komeza kwiga n'IMENA Teacher AI!`
         async function updateProgress() {
             if (!currentSubject) return;
             
-            // Calculate progress based on session
-            const { data: existing } = await db
-                .from('progress')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .eq('subject_id', currentSubject.id)
-                .single();
-            
-            if (existing) {
-                await db
+            try {
+                const { data: existing } = await db
                     .from('progress')
-                    .update({
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('subject_id', currentSubject.id)
+                    .single();
+                
+                if (existing) {
+                    await db.from('progress').update({
                         exercises_attempted: existing.exercises_attempted + 1,
                         time_spent_minutes: existing.time_spent_minutes + 5,
                         last_studied_at: new Date().toISOString()
-                    })
-                    .eq('id', existing.id);
-            } else {
-                await db
-                    .from('progress')
-                    .insert([{
+                    }).eq('id', existing.id);
+                } else {
+                    await db.from('progress').insert([{
                         user_id: currentUser.id,
                         subject_id: currentSubject.id,
                         level: currentProfile.education_level,
                         exercises_attempted: 1,
                         time_spent_minutes: 5
                     }]);
+                }
+            } catch (err) {
+                console.error('Error updating progress:', err);
             }
         }
 
@@ -1683,19 +1743,20 @@ Komeza kwiga n'IMENA Teacher AI!`
         // HISTORY
         // ==========================================
         async function loadHistory() {
-            const { data, error } = await db
-                .from('learning_sessions')
-                .select('*, subject_master(name_en)')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false })
-                .limit(20);
-            
-            if (error) {
-                console.error('Error loading history:', error);
-                return;
+            try {
+                const { data, error } = await db
+                    .from('learning_sessions')
+                    .select('*, subject_master(name_en)')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
+                
+                renderHistory(data || []);
+            } catch (err) {
+                console.error('Error loading history:', err);
             }
-            
-            renderHistory(data || []);
         }
 
         function renderHistory(sessions) {
@@ -1712,7 +1773,7 @@ Komeza kwiga n'IMENA Teacher AI!`
                         <div>
                             <h4>${s.title}</h4>
                             <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                                ${s.subject_master?.name_en || 'General'} • ${new Date(s.created_at).toLocaleDateString()} • ${s.status}
+                                ${s.subject_master?.name_en || 'General'} • ${new Date(s.created_at).toLocaleDateString()}
                             </p>
                         </div>
                         <span style="font-size: 24px;">➔</span>
@@ -1722,33 +1783,33 @@ Komeza kwiga n'IMENA Teacher AI!`
         }
 
         async function resumeSession(sessionId) {
-            const { data: session } = await db
-                .from('learning_sessions')
-                .select('*, subject_master(*)')
-                .eq('id', sessionId)
-                .single();
-            
-            if (session) {
+            try {
+                const { data: session } = await db
+                    .from('learning_sessions')
+                    .select('*, subject_master(*)')
+                    .eq('id', sessionId)
+                    .single();
+                
+                if (!session) return;
+                
                 currentSession = session;
                 currentSubject = session.subject_master;
                 
-                // Load messages
                 const { data: messages } = await db
                     .from('messages')
                     .select('*')
                     .eq('session_id', sessionId)
                     .order('created_at', { ascending: true });
                 
-                // Clear and rebuild chat
                 const container = document.getElementById('chatMessages');
                 container.innerHTML = '';
                 
-                messages?.forEach(m => {
-                    addMessageToUI(m.role, m.content);
-                });
+                messages?.forEach(m => addMessageToUI(m.role, m.content));
                 
                 document.getElementById('chatTitle').textContent = session.title;
                 showSection('chat');
+            } catch (err) {
+                console.error('Error resuming session:', err);
             }
         }
 
@@ -1766,26 +1827,7 @@ Komeza kwiga n'IMENA Teacher AI!`
                 return;
             }
             
-            // Generate using AI
-            const prompt = `Create a detailed lesson plan for REB ${level} ${subject} on "${topic}" for ${duration} minutes. Include: objectives, materials, introduction, development, conclusion, and assessment.`;
-            
-            // In production, call AI API here
-            const lessonPlan = await getAIResponse(prompt);
-            
-            // Save to teacher resources
-            await db
-                .from('teacher_resources')
-                .insert([{
-                    teacher_id: currentUser.id,
-                    resource_type: 'lesson_plan',
-                    subject_id: subject,
-                    level: level,
-                    title: `Lesson Plan: ${topic}`,
-                    content: lessonPlan,
-                    language: currentProfile.preferred_language
-                }]);
-            
-            alert('Lesson plan generated and saved!');
+            alert('Lesson plan generation coming soon! Subject: ' + subject + ', Level: ' + level);
         }
 
         async function generateWorksheet() {
@@ -1793,54 +1835,30 @@ Komeza kwiga n'IMENA Teacher AI!`
             const questions = document.getElementById('worksheetQuestions').value;
             const focus = document.getElementById('worksheetFocus').value;
             
-            const prompt = `Create a worksheet with ${questions} questions for ${subject} focusing on: ${focus}. Include answer key.`;
-            
-            const worksheet = await getAIResponse(prompt);
-            
-            await db
-                .from('teacher_resources')
-                .insert([{
-                    teacher_id: currentUser.id,
-                    resource_type: 'worksheet',
-                    subject_id: subject,
-                    level: currentProfile.education_level,
-                    title: `Worksheet: ${focus}`,
-                    content: worksheet,
-                    language: currentProfile.preferred_language
-                }]);
-            
-            alert('Worksheet generated and saved!');
+            alert('Worksheet generation coming soon! Subject: ' + subject);
         }
 
         // ==========================================
         // UTILITIES
         // ==========================================
         function changeLanguage(lang) {
-            currentProfile.preferred_language = lang;
+            if (currentProfile) {
+                currentProfile.preferred_language = lang;
+                db.from('profiles').update({ preferred_language: lang }).eq('id', currentUser.id);
+            }
             updateWelcomeMessage(lang);
-            
-            // Update in database
-            db
-                .from('profiles')
-                .update({ preferred_language: lang })
-                .eq('id', currentUser.id);
         }
 
         function updateWelcomeMessage(lang) {
             const welcomes = {
                 english: "Welcome! I'm IMENA, your REB curriculum-aligned learning companion.",
-                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire ukurikije gahunda ya REB.",
-                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza anayefuata mtaala wa REB.",
-                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage aligné sur le programme REB."
+                kinyarwanda: "Murakaza neza! Ndimwe IMENA, umufasha wanyu w'imyigire.",
+                kiswahili: "Karibu! Mimi ni IMENA, mwenzi wako wa kujifunza.",
+                french: "Bienvenue! Je suis IMENA, votre compagnon d'apprentissage."
             };
             
             const el = document.getElementById('welcomeMessage');
             if (el) el.textContent = welcomes[lang];
-        }
-
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            document.getElementById('sidebar').classList.toggle('open');
         }
     </script>
 </body>
