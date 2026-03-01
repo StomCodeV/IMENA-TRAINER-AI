@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* [All your existing styles remain exactly the same] */
         * {
             margin: 0;
             padding: 0;
@@ -44,7 +45,6 @@
             line-height: 1.6;
         }
 
-        /* Animated Background - 2026 Style */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -91,6 +91,7 @@
             background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), transparent);
             top: 50%;
             left: 50%;
+            transform: translate(-50%, -50%);
             animation-delay: -10s;
         }
 
@@ -101,7 +102,6 @@
             75% { transform: translate(20px, 30px) scale(1.02); }
         }
 
-        /* Grid Pattern Overlay */
         .grid-overlay {
             position: fixed;
             top: 0;
@@ -116,7 +116,6 @@
             pointer-events: none;
         }
 
-        /* Layout */
         .app-container {
             max-width: 1600px;
             margin: 0 auto;
@@ -126,7 +125,6 @@
 
         .hidden { display: none !important; }
 
-        /* Auth Screens - 2026 Modern Design */
         .auth-container {
             display: flex;
             justify-content: center;
@@ -247,6 +245,12 @@
             margin-bottom: 20px;
         }
 
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -257,7 +261,7 @@
             letter-spacing: 0.5px;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 14px 18px;
             background: var(--bg-glass);
@@ -269,14 +273,14 @@
             font-family: inherit;
         }
 
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary-light);
             box-shadow: 0 0 0 3px rgba(0, 136, 255, 0.1);
             background: rgba(255, 255, 255, 0.05);
         }
 
-        input::placeholder {
+        input::placeholder, textarea::placeholder {
             color: var(--text-muted);
         }
 
@@ -394,7 +398,6 @@
             color: #93c5fd;
         }
 
-        /* Main App Layout - 2026 Style */
         .main-app {
             display: grid;
             grid-template-columns: 300px 1fr;
@@ -402,7 +405,6 @@
             height: calc(100vh - 48px);
         }
 
-        /* Sidebar */
         .sidebar {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -513,7 +515,6 @@
             font-size: 14px;
         }
 
-        /* Main Content Area */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -557,7 +558,6 @@
             font-weight: 600;
         }
 
-        /* Chat Interface - 2026 Style */
         .chat-container {
             flex: 1;
             background: var(--bg-card);
@@ -689,7 +689,6 @@
             font-size: 20px;
         }
 
-        /* Subject Selection - 2026 Grid */
         .subjects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -761,7 +760,6 @@
             z-index: 1;
         }
 
-        /* Progress Dashboard - 2026 Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -846,7 +844,6 @@
             100% { transform: translateX(100%); }
         }
 
-        /* Teacher Tools */
         .tools-container {
             padding: 28px;
         }
@@ -868,7 +865,6 @@
             gap: 12px;
         }
 
-        /* Loading States - 2026 Style */
         .typing-indicator {
             display: flex;
             gap: 6px;
@@ -891,7 +887,6 @@
             30% { transform: translateY(-12px); opacity: 1; }
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
             .main-app {
                 grid-template-columns: 1fr;
@@ -912,7 +907,6 @@
             }
         }
 
-        /* Scrollbar - 2026 Style */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -968,7 +962,7 @@
                     <span>→</span>
                 </button>
                 <div class="auth-switch">
-                    Don't have an account? <a onclick="showRegister()">Create one</a>
+                    Don't have an account? <a id="showRegisterLink">Create one</a>
                 </div>
             </form>
 
@@ -1028,7 +1022,7 @@
                     <span>→</span>
                 </button>
                 <div class="auth-switch">
-                    Already have an account? <a onclick="showLogin()">Sign in</a>
+                    Already have an account? <a id="showLoginLink">Sign in</a>
                 </div>
             </form>
         </div>
@@ -1048,23 +1042,23 @@
                 </div>
 
                 <nav class="nav-menu">
-                    <div class="nav-item active" onclick="showSection('chat')">
+                    <div class="nav-item active" data-section="chat">
                         <span class="nav-icon">💬</span>
                         <span>Learn</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('subjects')">
+                    <div class="nav-item" data-section="subjects">
                         <span class="nav-icon">📚</span>
                         <span>Subjects</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('progress')">
+                    <div class="nav-item" data-section="progress">
                         <span class="nav-icon">📊</span>
                         <span>Progress</span>
                     </div>
-                    <div class="nav-item" onclick="showSection('history')">
+                    <div class="nav-item" data-section="history">
                         <span class="nav-icon">🕐</span>
                         <span>History</span>
                     </div>
-                    <div class="nav-item teacher-only hidden" onclick="showSection('teacher-tools')">
+                    <div class="nav-item teacher-only hidden" data-section="teacher-tools">
                         <span class="nav-icon">🛠️</span>
                         <span>Tools</span>
                     </div>
@@ -1072,7 +1066,7 @@
 
                 <div class="language-selector">
                     <label>Language</label>
-                    <select id="appLanguage" onchange="changeLanguage(this.value)">
+                    <select id="appLanguage">
                         <option value="english">🇬🇧 English</option>
                         <option value="kinyarwanda">🇷🇼 Kinyarwanda</option>
                         <option value="kiswahili">🇹🇿 Kiswahili</option>
@@ -1080,7 +1074,7 @@
                     </select>
                 </div>
 
-                <button class="btn btn-secondary" onclick="logout()" style="margin-top: 16px;">
+                <button class="btn btn-secondary" id="logoutBtn">
                     <span>🚪</span> Logout
                 </button>
             </aside>
@@ -1095,10 +1089,10 @@
                             <p id="chatSubtitle">Ask IMENA anything about your studies</p>
                         </div>
                         <div class="header-actions">
-                            <button class="btn btn-small btn-secondary" onclick="showSection('subjects')">
+                            <button class="btn btn-small btn-secondary" id="subjectsBtn">
                                 📚 Subjects
                             </button>
-                            <button class="btn btn-small" onclick="newSession()">
+                            <button class="btn btn-small" id="newSessionBtn">
                                 ✨ New
                             </button>
                         </div>
@@ -1111,7 +1105,7 @@
                                     <span>🎓</span>
                                     <span>IMENA Teacher AI</span>
                                 </div>
-                                <div class="message-content" id="welcomeMessage">
+                                <div class="message-content">
                                     Murakaza neza! I'm IMENA, your intelligent learning companion for the Rwanda Basic Education Board curriculum. I can help you with Mathematics, Sciences, Languages, and more.
 
 What would you like to learn today?
@@ -1124,9 +1118,8 @@ What would you like to learn today?
                                 id="messageInput" 
                                 placeholder="Ask me anything..."
                                 rows="1"
-                                onkeydown="handleKeyDown(event)"
                             ></textarea>
-                            <button class="btn send-btn" onclick="sendMessage()">
+                            <button class="btn send-btn" id="sendMessageBtn">
                                 ➤
                             </button>
                         </div>
@@ -1204,7 +1197,7 @@ What would you like to learn today?
                                 <label>Topic</label>
                                 <input type="text" id="toolTopic" placeholder="e.g., Photosynthesis">
                             </div>
-                            <button class="btn" onclick="generateLessonPlan()">Generate</button>
+                            <button class="btn" id="generateLessonBtn">Generate</button>
                         </div>
 
                         <div class="tool-section">
@@ -1221,9 +1214,9 @@ What would you like to learn today?
                             </div>
                             <div class="form-group">
                                 <label>Focus Area</label>
-                                <textarea id="worksheetFocus" placeholder="Describe the content..."></textarea>
+                                <textarea id="worksheetFocus" placeholder="Describe the content..." rows="3"></textarea>
                             </div>
-                            <button class="btn" onclick="generateWorksheet()">Create</button>
+                            <button class="btn" id="generateWorksheetBtn">Create</button>
                         </div>
                     </div>
                 </div>
@@ -1238,7 +1231,8 @@ What would you like to learn today?
         const SUPABASE_URL = 'https://fovnqwlrnldzsgfysdmv.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZvdm5xd2xybmxkenNnZnlzZG12Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NzcwMzYsImV4cCI6MjA4NzI1MzAzNn0.llcmM2Yc7Guqm5eS7swSYxP3suyk_6Sn3hERxVy4mu0';
         
-        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Create Supabase client
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Global State
         let currentUser = null;
@@ -1246,9 +1240,13 @@ What would you like to learn today?
         let currentSession = null;
         let currentSubject = null;
         let subjects = [];
+        
+        // Rate limiting
+        let lastAuthAttempt = 0;
+        const AUTH_COOLDOWN = 30000; // 30 seconds cooldown between auth attempts
+        let authAttempts = 0;
         let isRateLimited = false;
-        let lastRequestTime = 0;
-        const MIN_REQUEST_INTERVAL = 2000;
+        let rateLimitTimeout = null;
 
         // ==========================================
         // INITIALIZATION
@@ -1260,7 +1258,7 @@ What would you like to learn today?
 
         async function checkSession() {
             try {
-                const { data: { session }, error } = await db.auth.getSession();
+                const { data: { session }, error } = await supabaseClient.auth.getSession();
                 if (error) throw error;
                 
                 if (session) {
@@ -1276,55 +1274,113 @@ What would you like to learn today?
         }
 
         function setupEventListeners() {
+            // Auth form submissions
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('registerForm').addEventListener('submit', handleRegister);
             
+            // Auth switch links
+            document.getElementById('showRegisterLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showRegister();
+            });
+            
+            document.getElementById('showLoginLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showLogin();
+            });
+            
+            // Nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    const section = this.dataset.section;
+                    if (section) {
+                        showSection(section, e);
+                    }
+                });
+            });
+            
+            // Language selector
+            document.getElementById('appLanguage').addEventListener('change', function(e) {
+                changeLanguage(e.target.value);
+            });
+            
+            // Chat input
             const textarea = document.getElementById('messageInput');
             textarea.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 150) + 'px';
             });
+            
+            textarea.addEventListener('keydown', handleKeyDown);
+            
+            // Buttons
+            document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+            document.getElementById('newSessionBtn').addEventListener('click', newSession);
+            document.getElementById('subjectsBtn').addEventListener('click', () => showSection('subjects'));
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('generateLessonBtn').addEventListener('click', generateLessonPlan);
+            document.getElementById('generateWorksheetBtn').addEventListener('click', generateWorksheet);
         }
 
         // ==========================================
         // RATE LIMITING & UTILITIES
         // ==========================================
-        function canMakeRequest() {
+        function checkRateLimit() {
             const now = Date.now();
+            
+            // Reset attempts after cooldown
+            if (now - lastAuthAttempt > AUTH_COOLDOWN) {
+                authAttempts = 0;
+            }
+            
+            // Check if rate limited
             if (isRateLimited) {
-                showMessage('Too many attempts. Please wait 30 seconds...', 'warning');
+                const timeLeft = Math.ceil((rateLimitTimeout - now) / 1000);
+                showMessage(`Too many attempts. Please wait ${timeLeft} seconds.`, 'warning');
                 return false;
             }
-            if (now - lastRequestTime < MIN_REQUEST_INTERVAL) {
-                showMessage('Please wait a moment...', 'warning');
+            
+            // Increment attempts
+            authAttempts++;
+            lastAuthAttempt = now;
+            
+            // If too many attempts, trigger rate limit
+            if (authAttempts > 5) {
+                isRateLimited = true;
+                rateLimitTimeout = now + 60000; // 1 minute lockout
+                
+                showMessage('Too many login attempts. Please wait 60 seconds.', 'warning');
+                
+                setTimeout(() => {
+                    isRateLimited = false;
+                    rateLimitTimeout = null;
+                    authAttempts = 0;
+                    hideMessage();
+                }, 60000);
+                
                 return false;
             }
-            lastRequestTime = now;
+            
             return true;
-        }
-
-        function handleRateLimit() {
-            isRateLimited = true;
-            showMessage('Rate limit exceeded. Please wait 30 seconds.', 'warning');
-            setTimeout(() => {
-                isRateLimited = false;
-                hideMessage();
-            }, 30000);
         }
 
         function showMessage(text, type = 'info') {
             const el = document.getElementById('authMessage');
-            el.textContent = text;
-            el.className = 'message-box show ' + type;
+            if (el) {
+                el.textContent = text;
+                el.className = 'message-box show ' + type;
+            }
         }
 
         function hideMessage() {
             const el = document.getElementById('authMessage');
-            el.classList.remove('show');
+            if (el) {
+                el.classList.remove('show');
+            }
         }
 
         // ==========================================
-        // AUTHENTICATION - FIXED VERSION
+        // AUTHENTICATION
         // ==========================================
         function showLogin() {
             document.getElementById('loginForm').classList.remove('hidden');
@@ -1340,9 +1396,12 @@ What would you like to learn today?
 
         function setLoading(btnId, loading) {
             const btn = document.getElementById(btnId);
+            if (!btn) return;
             btn.disabled = loading;
             const spans = btn.querySelectorAll('span');
-            spans[0].textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Sign In' : 'Create Account');
+            if (spans.length >= 2) {
+                spans[0].textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Sign In' : 'Create Account');
+            }
         }
 
         function showAuth() {
@@ -1356,11 +1415,10 @@ What would you like to learn today?
             initializeApp();
         }
 
-        // FIXED LOGIN - Handles email confirmation properly
         async function handleLogin(e) {
             e.preventDefault();
             
-            if (!canMakeRequest()) return;
+            if (!checkRateLimit()) return;
             
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -1376,7 +1434,7 @@ What would you like to learn today?
             try {
                 console.log('Logging in:', email);
                 
-                const { data, error } = await db.auth.signInWithPassword({ 
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ 
                     email, 
                     password 
                 });
@@ -1384,23 +1442,10 @@ What would you like to learn today?
                 if (error) {
                     console.error('Login error:', error);
                     
-                    if (error.status === 400 && error.message.includes('Invalid login')) {
-                        // Check if user exists but email not confirmed
-                        const { data: userData, error: userError } = await db.auth.signUp({
-                            email,
-                            password,
-                            options: { emailRedirectTo: window.location.origin }
-                        });
-                        
-                        if (userError && userError.message.includes('already registered')) {
-                            showMessage('Email not confirmed. Please check your inbox or contact support.', 'warning');
-                        } else {
-                            showMessage('Invalid email or password', 'error');
-                        }
-                    } else if (error.status === 429) {
-                        handleRateLimit();
+                    if (error.status === 429) {
+                        showMessage('Too many login attempts. Please try again later.', 'warning');
                     } else {
-                        showMessage(error.message, 'error');
+                        showMessage(error.message || 'Invalid email or password', 'error');
                     }
                     
                     setLoading('loginBtn', false);
@@ -1418,11 +1463,10 @@ What would you like to learn today?
             }
         }
 
-        // FIXED REGISTRATION - Auto-confirms for testing
         async function handleRegister(e) {
             e.preventDefault();
             
-            if (!canMakeRequest()) return;
+            if (!checkRateLimit()) return;
             
             const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
@@ -1447,8 +1491,7 @@ What would you like to learn today?
             try {
                 console.log('Registering:', email);
                 
-                // Create user with auto-confirm (for testing)
-                const { data: authData, error: authError } = await db.auth.signUp({
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email,
                     password,
                     options: {
@@ -1457,8 +1500,7 @@ What would you like to learn today?
                             role,
                             education_level: level,
                             preferred_language: language
-                        },
-                        emailRedirectTo: window.location.origin
+                        }
                     }
                 });
                 
@@ -1466,7 +1508,7 @@ What would you like to learn today?
                     console.error('Registration error:', authError);
                     
                     if (authError.status === 429) {
-                        handleRateLimit();
+                        showMessage('Too many registration attempts. Please try again later.', 'warning');
                     } else if (authError.message.includes('already registered')) {
                         showMessage('Email already registered. Please log in.', 'error');
                     } else {
@@ -1479,33 +1521,35 @@ What would you like to learn today?
                 
                 console.log('User created:', authData.user.id);
                 
-                // Wait for trigger then create profile if needed
-                await new Promise(r => setTimeout(r, 1500));
-                
-                // Try to get or create profile
-                let { data: profile } = await db
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', authData.user.id)
-                    .single();
-                
-                if (!profile) {
-                    await db.from('profiles').insert([{
-                        id: authData.user.id,
-                        full_name: fullName,
-                        role,
-                        education_level: level,
-                        preferred_language: language
-                    }]);
-                }
-                
-                showMessage('Account created! You can now log in.', 'success');
-                document.getElementById('registerForm').reset();
-                
-                setTimeout(() => {
-                    showLogin();
+                // Check if user was actually created (not just sent confirmation)
+                if (authData.user && authData.user.id) {
+                    // Create profile
+                    const { error: profileError } = await supabaseClient
+                        .from('profiles')
+                        .insert([{
+                            id: authData.user.id,
+                            full_name: fullName,
+                            role,
+                            education_level: level,
+                            preferred_language: language
+                        }]);
+                    
+                    if (profileError) {
+                        console.error('Profile creation error:', profileError);
+                    }
+                    
+                    showMessage('Account created successfully! You can now log in.', 'success');
+                    document.getElementById('registerForm').reset();
+                    
+                    setTimeout(() => {
+                        showLogin();
+                        setLoading('registerBtn', false);
+                    }, 2000);
+                } else {
+                    // Email confirmation required
+                    showMessage('Please check your email to confirm your account.', 'success');
                     setLoading('registerBtn', false);
-                }, 2000);
+                }
                 
             } catch (err) {
                 console.error('Registration exception:', err);
@@ -1518,15 +1562,16 @@ What would you like to learn today?
             currentUser = user;
             
             try {
-                let { data: profile, error } = await db
+                let { data: profile, error } = await supabaseClient
                     .from('profiles')
                     .select('*')
                     .eq('id', user.id)
                     .single();
                 
-                if (!profile) {
+                if (error || !profile) {
+                    // Create profile if it doesn't exist
                     const metadata = user.user_metadata || {};
-                    const { data: newProfile } = await db
+                    const { data: newProfile, error: insertError } = await supabaseClient
                         .from('profiles')
                         .insert([{
                             id: user.id,
@@ -1537,18 +1582,30 @@ What would you like to learn today?
                         }])
                         .select()
                         .single();
+                    
+                    if (insertError) throw insertError;
                     profile = newProfile;
                 }
                 
                 currentProfile = profile;
                 
-                document.getElementById('userName').textContent = profile.full_name;
-                document.getElementById('userRole').textContent = profile.role === 'teacher' ? 'Teacher' : 'Student';
-                document.getElementById('userAvatar').textContent = profile.full_name.charAt(0).toUpperCase();
-                document.getElementById('appLanguage').value = profile.preferred_language;
+                const userNameEl = document.getElementById('userName');
+                const userRoleEl = document.getElementById('userRole');
+                const userAvatarEl = document.getElementById('userAvatar');
+                const appLanguageEl = document.getElementById('appLanguage');
                 
-                if (profile.role === 'teacher') {
-                    document.querySelector('.teacher-only')?.classList.remove('hidden');
+                if (userNameEl) userNameEl.textContent = profile.full_name;
+                if (userRoleEl) userRoleEl.textContent = profile.role === 'teacher' ? 'Teacher' : 'Student';
+                if (userAvatarEl) userAvatarEl.textContent = profile.full_name.charAt(0).toUpperCase();
+                if (appLanguageEl) appLanguageEl.value = profile.preferred_language;
+                
+                const teacherOnlyEl = document.querySelector('.teacher-only');
+                if (teacherOnlyEl) {
+                    if (profile.role === 'teacher') {
+                        teacherOnlyEl.classList.remove('hidden');
+                    } else {
+                        teacherOnlyEl.classList.add('hidden');
+                    }
                 }
                 
                 updateWelcomeMessage(profile.preferred_language);
@@ -1559,7 +1616,7 @@ What would you like to learn today?
         }
 
         async function logout() {
-            await db.auth.signOut();
+            await supabaseClient.auth.signOut();
             currentUser = null;
             currentProfile = null;
             showAuth();
@@ -1576,52 +1633,96 @@ What would you like to learn today?
 
         async function loadSubjects() {
             try {
-                const { data, error } = await db.from('subject_master').select('*').order('id');
+                const { data, error } = await supabaseClient.from('subject_master').select('*').order('id');
                 if (error) throw error;
                 subjects = data || [];
                 renderSubjects();
                 populateSubjectSelects();
             } catch (err) {
                 console.error('Subjects error:', err);
+                // If table doesn't exist, use mock data
+                subjects = [
+                    { id: 1, name_en: 'Mathematics', category: 'sciences', applicable_levels: ['P1','P2','P3','P4','P5','P6','S1','S2','S3','S4','S5','S6'] },
+                    { id: 2, name_en: 'English', category: 'languages', applicable_levels: ['P1','P2','P3','P4','P5','P6','S1','S2','S3','S4','S5','S6'] },
+                    { id: 3, name_en: 'Kinyarwanda', category: 'languages', applicable_levels: ['P1','P2','P3','P4','P5','P6','S1','S2','S3','S4','S5','S6'] },
+                    { id: 4, name_en: 'Physics', category: 'sciences', applicable_levels: ['S1','S2','S3','S4','S5','S6'] },
+                    { id: 5, name_en: 'Chemistry', category: 'sciences', applicable_levels: ['S1','S2','S3','S4','S5','S6'] },
+                    { id: 6, name_en: 'Biology', category: 'sciences', applicable_levels: ['S1','S2','S3','S4','S5','S6'] },
+                    { id: 7, name_en: 'History', category: 'humanities', applicable_levels: ['S1','S2','S3','S4','S5','S6'] },
+                    { id: 8, name_en: 'Geography', category: 'humanities', applicable_levels: ['S1','S2','S3','S4','S5','S6'] }
+                ];
+                renderSubjects();
+                populateSubjectSelects();
             }
         }
 
         function renderSubjects() {
             const grid = document.getElementById('subjectsGrid');
+            if (!grid) return;
+            
             const userLevel = currentProfile?.education_level || 'P1';
             const applicable = subjects.filter(s => s.applicable_levels?.includes(userLevel));
             
+            if (applicable.length === 0) {
+                grid.innerHTML = '<div class="subject-card"><h3>No subjects available</h3><p>Please check back later</p></div>';
+                return;
+            }
+            
             grid.innerHTML = applicable.map(s => `
-                <div class="subject-card" onclick="selectSubject(${s.id})">
+                <div class="subject-card" data-subject-id="${s.id}">
                     <div class="subject-icon">${getSubjectEmoji(s.category)}</div>
                     <h3>${getSubjectName(s)}</h3>
-                    <p>${s.category}</p>
+                    <p>${s.category || ''}</p>
                 </div>
             `).join('');
+            
+            // Add click handlers to subject cards
+            document.querySelectorAll('.subject-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.subjectId);
+                    selectSubject(id);
+                });
+            });
         }
 
         function getSubjectEmoji(cat) {
-            const map = { languages: '🗣️', sciences: '🔬', humanities: '📜', arts: '🎨', technical: '⚙️', religion: '⛪' };
-            return map[cat] || '📚';
+            const map = { 
+                languages: '🗣️', 
+                sciences: '🔬', 
+                humanities: '📜', 
+                arts: '🎨', 
+                technical: '⚙️', 
+                religion: '⛪' 
+            };
+            return map[cat?.toLowerCase()] || '📚';
         }
 
         function getSubjectName(s) {
             const lang = currentProfile?.preferred_language || 'english';
-            return s[`name_${lang}`] || s.name_en;
+            return s[`name_${lang}`] || s.name_en || 'Subject';
         }
 
         function populateSubjectSelects() {
-            const opts = subjects.map(s => `<option value="${s.id}">${s.name_en}</option>`).join('');
-            ['toolSubject', 'worksheetSubject'].forEach(id => {
-                document.getElementById(id)?.insertAdjacentHTML('beforeend', opts);
-            });
+            const opts = subjects.map(s => `<option value="${s.id}">${s.name_en || 'Subject'}</option>`).join('');
+            
+            const toolSubject = document.getElementById('toolSubject');
+            const worksheetSubject = document.getElementById('worksheetSubject');
+            
+            if (toolSubject) toolSubject.innerHTML = opts;
+            if (worksheetSubject) worksheetSubject.innerHTML = opts;
         }
 
-        function showSection(section) {
+        function showSection(section, event) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(section + 'Section')?.classList.remove('hidden');
+            
+            const sectionEl = document.getElementById(section + 'Section');
+            if (sectionEl) sectionEl.classList.remove('hidden');
+            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if (event?.currentTarget) event.currentTarget.classList.add('active');
+            if (event?.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+            
             if (section === 'progress') loadProgress();
             if (section === 'history') loadHistory();
         }
@@ -1630,23 +1731,47 @@ What would you like to learn today?
             currentSubject = subjects.find(s => s.id === id);
             if (!currentSubject) return;
             
-            const { data: session } = await db.from('learning_sessions').insert([{
-                user_id: currentUser.id,
-                subject_id: id,
-                session_type: 'lesson',
-                title: `${getSubjectName(currentSubject)} - ${new Date().toLocaleDateString()}`,
-                language_used: currentProfile.preferred_language
-            }]).select().single();
-            
-            currentSession = session;
-            document.getElementById('chatTitle').textContent = getSubjectName(currentSubject);
-            document.getElementById('chatMessages').innerHTML = `
-                <div class="message assistant">
-                    <div class="message-header"><span>🎓</span><span>IMENA</span></div>
-                    <div class="message-content">${getSubjectWelcome(currentSubject)}</div>
-                </div>
-            `;
-            showSection('chat');
+            try {
+                const { data: session, error } = await supabaseClient
+                    .from('learning_sessions')
+                    .insert([{
+                        user_id: currentUser.id,
+                        subject_id: id,
+                        session_type: 'lesson',
+                        title: `${getSubjectName(currentSubject)} - ${new Date().toLocaleDateString()}`,
+                        language_used: currentProfile.preferred_language
+                    }])
+                    .select()
+                    .single();
+                
+                if (error) {
+                    console.error('Session creation error:', error);
+                    // Continue without session
+                    currentSession = null;
+                } else {
+                    currentSession = session;
+                }
+                
+                const chatTitle = document.getElementById('chatTitle');
+                if (chatTitle) chatTitle.textContent = getSubjectName(currentSubject);
+                
+                const chatMessages = document.getElementById('chatMessages');
+                if (chatMessages) {
+                    chatMessages.innerHTML = `
+                        <div class="message assistant">
+                            <div class="message-header"><span>🎓</span><span>IMENA</span></div>
+                            <div class="message-content">${getSubjectWelcome(currentSubject)}</div>
+                        </div>
+                    `;
+                }
+                
+                showSection('chat');
+            } catch (err) {
+                console.error('Session creation error:', err);
+                // Continue without session
+                currentSession = null;
+                showSection('chat');
+            }
         }
 
         function getSubjectWelcome(s) {
@@ -1658,19 +1783,25 @@ What would you like to learn today?
                 kiswahili: `Karibu kwenye ${name}! Niko tayari kukusaidia. Ungependa kujifunza nini?`,
                 french: `Bienvenue en ${name}! Je suis prêt à vous aider. Que souhaitez-vous explorer?`
             };
-            return msgs[lang];
+            return msgs[lang] || msgs.english;
         }
 
         function newSession() {
             currentSession = null;
             currentSubject = null;
-            document.getElementById('chatTitle').textContent = 'Start Learning';
-            document.getElementById('chatMessages').innerHTML = `
-                <div class="message assistant">
-                    <div class="message-header"><span>🎓</span><span>IMENA</span></div>
-                    <div class="message-content" id="welcomeMessage">${getGenericWelcome()}</div>
-                </div>
-            `;
+            
+            const chatTitle = document.getElementById('chatTitle');
+            if (chatTitle) chatTitle.textContent = 'Start Learning';
+            
+            const chatMessages = document.getElementById('chatMessages');
+            if (chatMessages) {
+                chatMessages.innerHTML = `
+                    <div class="message assistant">
+                        <div class="message-header"><span>🎓</span><span>IMENA</span></div>
+                        <div class="message-content">${getGenericWelcome()}</div>
+                    </div>
+                `;
+            }
         }
 
         function getGenericWelcome() {
@@ -1681,11 +1812,13 @@ What would you like to learn today?
                 kiswahili: "Karibu! Mimi ni IMENA. Ungependa kujifunza nini?",
                 french: "Bienvenue! Je suis IMENA. Que souhaitez-vous apprendre?"
             };
-            return msgs[lang];
+            return msgs[lang] || msgs.english;
         }
 
         async function sendMessage() {
             const input = document.getElementById('messageInput');
+            if (!input) return;
+            
             const content = input.value.trim();
             if (!content) return;
             
@@ -1693,18 +1826,27 @@ What would you like to learn today?
             input.value = '';
             input.style.height = 'auto';
             
-            await saveMessage('user', content);
+            if (currentSession) {
+                await saveMessage('user', content);
+            }
+            
             showTypingIndicator();
             
             const response = await getAIResponse(content);
             removeTypingIndicator();
             addMessageToUI('assistant', response);
-            await saveMessage('assistant', response);
+            
+            if (currentSession) {
+                await saveMessage('assistant', response);
+            }
+            
             await updateProgress();
         }
 
         function addMessageToUI(role, content) {
             const container = document.getElementById('chatMessages');
+            if (!container) return;
+            
             const div = document.createElement('div');
             div.className = `message ${role}`;
             const header = role === 'user' ? '👤 You' : '🎓 IMENA';
@@ -1725,6 +1867,8 @@ What would you like to learn today?
 
         function showTypingIndicator() {
             const container = document.getElementById('chatMessages');
+            if (!container) return;
+            
             const div = document.createElement('div');
             div.className = 'message assistant typing';
             div.id = 'typingIndicator';
@@ -1741,22 +1885,19 @@ What would you like to learn today?
         }
 
         async function saveMessage(role, content) {
-            if (!currentSession) {
-                const { data: s } = await db.from('learning_sessions').insert([{
+            if (!currentSession || !currentUser) return;
+            
+            try {
+                await supabaseClient.from('messages').insert({
+                    session_id: currentSession.id,
                     user_id: currentUser.id,
-                    session_type: 'lesson',
-                    title: 'General Learning',
-                    language_used: currentProfile.preferred_language
-                }]).select().single();
-                currentSession = s;
+                    role,
+                    content,
+                    language: currentProfile.preferred_language
+                });
+            } catch (err) {
+                console.error('Message save error:', err);
             }
-            await db.from('messages').insert({
-                session_id: currentSession.id,
-                user_id: currentUser.id,
-                role,
-                content,
-                language: currentProfile.preferred_language
-            });
         }
 
         async function getAIResponse(msg) {
@@ -1786,60 +1927,108 @@ Would you like me to explain any specific part in more detail?
         }
 
         async function loadProgress() {
+            if (!currentUser) return;
+            
             try {
-                const { data } = await db.from('progress').select('*, subject_master(*)').eq('user_id', currentUser.id);
+                const { data } = await supabaseClient
+                    .from('progress')
+                    .select('*, subject_master(*)')
+                    .eq('user_id', currentUser.id);
+                    
                 renderProgress(data || []);
             } catch (err) {
                 console.error('Progress error:', err);
+                // Show empty progress
+                renderProgress([]);
             }
         }
 
         function renderProgress(data) {
             const grid = document.getElementById('statsGrid');
+            if (!grid) return;
+            
             if (!data.length) {
                 grid.innerHTML = '<div class="stat-card"><div class="stat-value">0%</div><p style="color: var(--text-secondary); margin-top: 8px;">Start learning to track progress!</p></div>';
                 return;
             }
+            
             grid.innerHTML = data.map(p => `
                 <div class="stat-card">
                     <div class="stat-header">
-                        <span class="stat-label">${p.subject_master?.name_en}</span>
-                        <span style="color: ${p.mastery_percentage >= 70 ? 'var(--success)' : 'var(--warning)'}">${p.revision_needed ? '⚠️' : '✓'}</span>
+                        <span class="stat-label">${p.subject_master?.name_en || 'Subject'}</span>
+                        <span style="color: ${(p.mastery_percentage || 0) >= 70 ? 'var(--success)' : 'var(--warning)'}">${p.revision_needed ? '⚠️' : '✓'}</span>
                     </div>
-                    <div class="stat-value">${Math.round(p.mastery_percentage)}%</div>
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${p.mastery_percentage}%"></div></div>
+                    <div class="stat-value">${Math.round(p.mastery_percentage || 0)}%</div>
+                    <div class="progress-bar"><div class="progress-fill" style="width: ${p.mastery_percentage || 0}%"></div></div>
                 </div>
             `).join('');
         }
 
         async function updateProgress() {
-            if (!currentSubject) return;
+            if (!currentSubject || !currentUser) return;
             // Implementation for progress tracking
         }
 
         async function loadHistory() {
+            if (!currentUser) return;
+            
             try {
-                const { data } = await db.from('learning_sessions').select('*, subject_master(name_en)').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
+                const { data } = await supabaseClient
+                    .from('learning_sessions')
+                    .select('*, subject_master(name_en)')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                    
                 const container = document.getElementById('historyList');
+                if (!container) return;
+                
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div class="tool-section"><p style="color: var(--text-secondary);">No learning history yet. Start a session!</p></div>';
+                    return;
+                }
+                
                 container.innerHTML = (data || []).map(s => `
-                    <div class="tool-section" style="cursor: pointer;" onclick="resumeSession('${s.id}')">
-                        <h4>${s.title}</h4>
+                    <div class="tool-section" style="cursor: pointer;" data-session-id="${s.id}">
+                        <h4>${s.title || 'Session'}</h4>
                         <p style="color: var(--text-secondary); font-size: 13px;">${s.subject_master?.name_en || 'General'} • ${new Date(s.created_at).toLocaleDateString()}</p>
                     </div>
                 `).join('');
+                
+                // Add click handlers to history items
+                document.querySelectorAll('[data-session-id]').forEach(item => {
+                    item.addEventListener('click', function() {
+                        const id = this.dataset.sessionId;
+                        resumeSession(id);
+                    });
+                });
             } catch (err) {
                 console.error('History error:', err);
+                const container = document.getElementById('historyList');
+                if (container) {
+                    container.innerHTML = '<div class="tool-section"><p style="color: var(--text-secondary);">Unable to load history.</p></div>';
+                }
             }
         }
 
         async function resumeSession(id) {
+            console.log('Resume session:', id);
             // Implementation for resuming sessions
+            alert('Session resume feature coming soon!');
         }
 
         function changeLanguage(lang) {
+            if (!currentProfile || !currentUser) return;
+            
             currentProfile.preferred_language = lang;
-            db.from('profiles').update({ preferred_language: lang }).eq('id', currentUser.id);
-            updateWelcomeMessage(lang);
+            supabaseClient
+                .from('profiles')
+                .update({ preferred_language: lang })
+                .eq('id', currentUser.id)
+                .then(() => {
+                    updateWelcomeMessage(lang);
+                })
+                .catch(err => console.error('Language update error:', err));
         }
 
         function updateWelcomeMessage(lang) {
@@ -1849,15 +2038,18 @@ Would you like me to explain any specific part in more detail?
                 kiswahili: "Karibu! Mimi ni IMENA.",
                 french: "Bienvenue! Je suis IMENA."
             };
-            const el = document.getElementById('welcomeMessage');
-            if (el) el.textContent = msgs[lang];
+            
+            const welcomeEl = document.querySelector('#chatMessages .message.assistant .message-content');
+            if (welcomeEl && !currentSubject) {
+                welcomeEl.textContent = msgs[lang] || msgs.english;
+            }
         }
 
-        async function generateLessonPlan() {
+        function generateLessonPlan() {
             alert('Lesson plan generator coming in v2.0!');
         }
 
-        async function generateWorksheet() {
+        function generateWorksheet() {
             alert('Worksheet creator coming in v2.0!');
         }
     </script>
